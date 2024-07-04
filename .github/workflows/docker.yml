@@ -50,6 +50,6 @@ jobs:
       - name: Build Output Worker
         uses: ./.github/actions/docker
         with:
-          name: frontend
+          name: worker
           dockerfile: self-hosted/docker/output-worker.Dockerfile
           token: ${{ secrets.GITHUB_TOKEN }}
