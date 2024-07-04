@@ -26,6 +26,7 @@ jobs:
         with:
           name: api
           dockerfile: self-hosted/docker/api.Dockerfile
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   frontend:
     runs-on: ubuntu-latest
@@ -38,6 +39,7 @@ jobs:
         with:
           name: frontend
           dockerfile: self-hosted/docker/frontend.Dockerfile
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   worker:
     runs-on: ubuntu-latest
@@ -50,3 +52,4 @@ jobs:
         with:
           name: frontend
           dockerfile: self-hosted/docker/output-worker.Dockerfile
+          token: ${{ secrets.GITHUB_TOKEN }}
