@@ -1,0 +1,52 @@
+name: Build Container Images
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build API
+        uses: ./.github/actions/docker
+        with:
+          name: api
+          dockerfile: self-hosted/docker/api.Dockerfile
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Frontend
+        uses: ./.github/actions/docker
+        with:
+          name: frontend
+          dockerfile: self-hosted/docker/frontend.Dockerfile
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Output Worker
+        uses: ./.github/actions/docker
+        with:
+          name: frontend
+          dockerfile: self-hosted/docker/output-worker.Dockerfile
