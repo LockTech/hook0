@@ -241,9 +241,13 @@ struct Config {
     #[clap(long, env, default_value = "false")]
     enable_unverified_users_cleanup: bool,
 
+    /// Duration (in second) to wait between unverified users cleanups
+    #[clap(long, env, default_value = "3600")]
+    unverified_users_cleanup_period_in_s: u64,
+
     /// Duration (in day) to wait before removing a unverified user
     #[clap(long, env, default_value = "7")]
-    unverified_users_cleanup_interval_in_days: u32,
+    unverified_users_cleanup_grace_period_in_days: u32,
 
     /// If true, unverified users will be reported and cleaned up; if false (default), they will only be reported
     #[clap(long, env, default_value = "false")]
@@ -274,7 +278,7 @@ struct Config {
     smtp_timeout_in_s: u64,
 
     /// URL of the Hook0 logo
-    #[clap(long, env, default_value = "https://hook0.com/256x256.png")]
+    #[clap(long, env, default_value = "https://app.hook0.com/256x256.png")]
     email_logo_url: Url,
 
     /// Frontend application URL (used for building links in emails)
@@ -436,8 +440,8 @@ async fn main() -> anyhow::Result<()> {
             actix_web::rt::spawn(async move {
                 unverified_users_cleanup::periodically_clean_up_unverified_users(
                     &clean_unverified_users_db,
-                    Duration::from_secs(config.old_events_cleanup_period_in_s),
-                    config.unverified_users_cleanup_interval_in_days,
+                    Duration::from_secs(config.unverified_users_cleanup_period_in_s),
+                    config.unverified_users_cleanup_grace_period_in_days,
                     config.unverified_users_cleanup_report_and_delete,
                 )
                 .await;
@@ -547,10 +551,11 @@ async fn main() -> anyhow::Result<()> {
                 .add(("X-Content-Type-Options", "nosniff"))
                 .add(("Referrer-Policy", "strict-origin-when-cross-origin"))
                 .add(("X-XSS-Protection", "1; mode=block"))
-                .add(("Referrer-Policy", "SAMEORIGIN"));
+                .add(("Referrer-Policy", "SAMEORIGIN"))
+                .add(("X-Frame-Options", "DENY"));
 
             let hsts_header = middleware::DefaultHeaders::new()
-                .add(("Strict-Transport-Security", "max-age=157680000"));
+                .add(("Strict-Transport-Security", "max-age=63072000"));
 
             let security_headers_condition =
                 middleware::Condition::new(config.enable_security_headers, security_headers);
